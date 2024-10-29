@@ -1,7 +1,11 @@
 import requests
 import zipfile
 import io
+import os
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 taxon = "2697049"
 wuhan_accession = "NC_045512.2"
