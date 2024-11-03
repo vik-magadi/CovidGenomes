@@ -9,13 +9,13 @@ import shutil
 
 load_dotenv()
 
-taxon = "2697049"
+TAXON = "2697049"
 wuhan_accession = "NC_045512.2"
 
 def get_genome_data(accession):
     data = {
         "accessions":[accession],
-        "taxon": taxon,
+        "taxon": TAXON,
         "include_sequence":["GENOME"],
         "aux_report":["DATASET_REPORT"],
         "format":"csv",
@@ -52,7 +52,15 @@ def upload_file_to_s3(accession):
 
     s3.Bucket(os.getenv("S3_BUCKET_NAME")).upload_file(file_path, accession + "_sequence.fna")
     
-get_genome_data(wuhan_accession)
+file = open("ncbi_api_scripts/accessions.txt", "r")
+content=file.readlines()
+
+content=[s.strip() for s in content]
+
+for accession in content:
+    get_genome_data(accession)
+file.close()
+
 
 
 
