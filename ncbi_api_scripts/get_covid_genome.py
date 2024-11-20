@@ -31,12 +31,29 @@ def get_genome_data(accession):
 
     # extract zip file and store it locally
     z = zipfile.ZipFile(io.BytesIO(genomeZip.content))
+
+    z.extract("ncbi_dataset/data/data_report.jsonl",path="./genome_data/" + accession)
     z.extract("ncbi_dataset/data/genomic.fna", path="./genome_data/" + accession)
+
+    # pull collectionDate field out of data_report.jsonl and add as first line  of genomic fna file
+    addCollectionDate(accession)
+
     
     upload_file_to_s3(accession)
 
-    # delete file from local
+    # remove genome data from local
     shutil.rmtree("./genome_data")
+def addCollectionDate(accession):
+    report_file_path = "./genome_data/" + accession + "/ncbi_dataset/data/data_report.jsonl"
+    with open(report_file_path, 'r') as file:    
+        data = json.load(file)
+    collection_date = data.get("isolate").get("collectionDate")
+    sequence_file_path = "./genome_data/" + accession + "/ncbi_dataset/data/genomic.fna"
+    with open(sequence_file_path, 'r+') as fp:
+        lines = fp.readlines()
+        lines.insert(0, collection_date) 
+        fp.seek(1)                
+        fp.writelines(lines)          
 
 def upload_file_to_s3(accession):
     file_path = "./genome_data/" + accession + "/ncbi_dataset/data/genomic.fna"
